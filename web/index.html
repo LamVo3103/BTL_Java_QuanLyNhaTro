@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hệ Thống Quản Lý Nhà Trọ</title>
+    <link rel="stylesheet" href="style.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1><i class="fas fa-home"></i> HỆ THỐNG QUẢN LÝ NHÀ TRỌ</h1>
+      </header>
+
+      <div class="main-content">
+        <aside class="sidebar">
+          <nav>
+            <ul>
+              <li>
+                <a href="#" class="active" onclick="showSection('dashboard')"
+                  ><i class="fas fa-tachometer-alt"></i> Dashboard</a
+                >
+              </li>
+              <li>
+                <a href="#" onclick="showSection('room-management')"
+                  ><i class="fas fa-door-open"></i> Quản lý phòng</a
+                >
+              </li>
+              <li>
+                <a href="#" onclick="showSection('room-status')"
+                  ><i class="fas fa-info-circle"></i> Trạng thái phòng</a
+                >
+              </li>
+              <li>
+                <a href="#" onclick="showSection('pricing')"
+                  ><i class="fas fa-tags"></i> Chiến lược giá</a
+                >
+              </li>
+              <li>
+                <a href="#" onclick="showSection('payment')"
+                  ><i class="fas fa-money-bill-wave"></i> Thanh toán</a
+                >
+              </li>
+              <li>
+                <a href="#" onclick="showSection('notifications')"
+                  ><i class="fas fa-bell"></i> Thông báo</a
+                >
+              </li>
+            </ul>
+          </nav>
+        </aside>
+
+        <main class="content">
+          <!-- Dashboard Section -->
+          <section id="dashboard" class="section">
+            <h2><i class="fas fa-tachometer-alt"></i> Dashboard</h2>
+            <div class="stats">
+              <div class="stat-card">
+                <h3>Tổng số phòng</h3>
+                <p id="total-rooms">0</p>
+              </div>
+              <div class="stat-card">
+                <h3>Phòng trống</h3>
+                <p id="available-rooms">0</p>
+              </div>
+              <div class="stat-card">
+                <h3>Phòng đang thuê</h3>
+                <p id="rented-rooms">0</p>
+              </div>
+              <div class="stat-card">
+                <h3>Phòng bảo trì</h3>
+                <p id="maintenance-rooms">0</p>
+              </div>
+            </div>
+            <div class="recent-activity">
+              <h3>Hoạt động gần đây</h3>
+              <ul id="activity-log"></ul>
+            </div>
+          </section>
+
+          <!-- Room Management Section -->
+          <section id="room-management" class="section" style="display: none">
+            <h2><i class="fas fa-door-open"></i> Quản lý phòng</h2>
+            <div class="room-actions">
+              <button onclick="showRoomForm()">
+                <i class="fas fa-plus"></i> Tạo phòng mới
+              </button>
+              <button onclick="loadRooms()">
+                <i class="fas fa-sync-alt"></i> Làm mới danh sách
+              </button>
+            </div>
+
+            <div id="room-form" style="display: none">
+              <h3>Tạo phòng mới</h3>
+              <form id="create-room-form">
+                <div class="form-group">
+                  <label for="room-type">Loại phòng:</label>
+                  <select id="room-type" required>
+                    <option value="SINGLE">Phòng đơn</option>
+                    <option value="DOUBLE">Phòng đôi</option>
+                    <option value="VIP">Phòng VIP</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="custom-price">Giá tùy chỉnh (nếu có):</label>
+                  <input
+                    type="number"
+                    id="custom-price"
+                    placeholder="Để trống để dùng giá mặc định"
+                  />
+                </div>
+                <button type="submit">Tạo phòng</button>
+                <button type="button" onclick="hideRoomForm()">Hủy</button>
+              </form>
+            </div>
+
+            <div class="room-list">
+              <h3>Danh sách phòng</h3>
+              <table id="rooms-table">
+                <thead>
+                  <tr>
+                    <th>ID Phòng</th>
+                    <th>Loại phòng</th>
+                    <th>Giá cơ bản</th>
+                    <th>Trạng thái</th>
+                    <th>Người thuê</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="rooms-list">
+                  <!-- Rooms will be loaded here -->
+                </tbody>
+              </table>
+            </div>
+          </section>
+
+          <!-- Room Status Section -->
+          <section id="room-status" class="section" style="display: none">
+            <h2><i class="fas fa-info-circle"></i> Trạng thái phòng</h2>
+            <div class="status-actions">
+              <div class="form-group">
+                <label for="room-select">Chọn phòng:</label>
+                <select id="room-select">
+                  <!-- Rooms will be loaded here -->
+                </select>
+              </div>
+
+              <div id="status-buttons">
+                <button onclick="rentRoom()">
+                  <i class="fas fa-sign-in-alt"></i> Thuê phòng
+                </button>
+                <button onclick="vacateRoom()">
+                  <i class="fas fa-sign-out-alt"></i> Trả phòng
+                </button>
+                <button onclick="maintainRoom()">
+                  <i class="fas fa-tools"></i> Bảo trì
+                </button>
+                <button onclick="makeAvailable()">
+                  <i class="fas fa-check"></i> Trở lại trạng thái trống
+                </button>
+              </div>
+            </div>
+
+            <div id="tenant-form" style="display: none">
+              <h3>Thông tin người thuê</h3>
+              <form id="rent-room-form">
+                <div class="form-group">
+                  <label for="tenant-name">Tên người thuê:</label>
+                  <input type="text" id="tenant-name" required />
+                </div>
+                <div class="form-group">
+                  <label for="tenant-phone">Số điện thoại:</label>
+                  <input type="text" id="tenant-phone" required />
+                </div>
+                <div class="form-group">
+                  <label for="due-date">Ngày đến hạn thanh toán:</label>
+                  <input type="date" id="due-date" required />
+                </div>
+                <button type="submit">Xác nhận thuê</button>
+                <button type="button" onclick="hideTenantForm()">Hủy</button>
+              </form>
+            </div>
+
+            <div class="room-details">
+              <h3>Chi tiết phòng</h3>
+              <div id="room-details-content">
+                <p>Vui lòng chọn một phòng để xem chi tiết</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Pricing Section -->
+          <section id="pricing" class="section" style="display: none">
+            <h2><i class="fas fa-tags"></i> Chiến lược giá</h2>
+            <div class="pricing-actions">
+              <div class="form-group">
+                <label for="pricing-room-select">Chọn phòng:</label>
+                <select id="pricing-room-select">
+                  <!-- Rooms will be loaded here -->
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="pricing-strategy">Chiến lược giá:</label>
+                <select id="pricing-strategy">
+                  <option value="NORMAL">Giá thông thường</option>
+                  <option value="PROMOTION">Giá khuyến mãi (giảm 10%)</option>
+                  <option value="VIP">Giá VIP (tăng 15%)</option>
+                </select>
+              </div>
+
+              <button onclick="updatePricingStrategy()">
+                <i class="fas fa-save"></i> Cập nhật chiến lược giá
+              </button>
+            </div>
+
+            <div class="pricing-details">
+              <h3>Thông tin giá</h3>
+              <div id="pricing-details-content">
+                <p>Vui lòng chọn một phòng để xem chi tiết giá</p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Payment Section -->
+          <section id="payment" class="section" style="display: none">
+            <h2><i class="fas fa-money-bill-wave"></i> Thanh toán</h2>
+            <div class="payment-actions">
+              <div class="form-group">
+                <label for="payment-room-select">Chọn phòng:</label>
+                <select id="payment-room-select">
+                  <!-- Rented rooms will be loaded here -->
+                </select>
+              </div>
+
+              <button onclick="showPaymentDetails()">
+                <i class="fas fa-search"></i> Xem chi tiết
+              </button>
+              <button onclick="simulatePayment()">
+                <i class="fas fa-check-circle"></i> Ghi nhận thanh toán
+              </button>
+            </div>
+
+            <div class="payment-details">
+              <h3>Chi tiết thanh toán</h3>
+              <div id="payment-details-content">
+                <p>
+                  Vui lòng chọn một phòng đang được thuê để xem chi tiết thanh
+                  toán
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- Notifications Section -->
+          <section id="notifications" class="section" style="display: none">
+            <h2><i class="fas fa-bell"></i> Thông báo</h2>
+            <div class="notification-actions">
+              <button onclick="loadNotifications()">
+                <i class="fas fa-sync-alt"></i> Làm mới
+              </button>
+              <button onclick="clearNotifications()">
+                <i class="fas fa-trash"></i> Xóa tất cả
+              </button>
+            </div>
+
+            <div class="notification-list">
+              <ul id="notifications-list">
+                <!-- Notifications will be loaded here -->
+              </ul>
+            </div>
+          </section>
+        </main>
+      </div>
+
+      <footer>
+        <p>Hệ thống quản lý nhà trọ &copy; VyThangDatLam</p>
+      </footer>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
