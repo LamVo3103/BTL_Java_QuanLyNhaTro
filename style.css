@@ -177,7 +177,8 @@ table tr:hover {
 /* Room details */
 .room-details,
 .pricing-details,
-.payment-details {
+.payment-details,
+.tenant-details {
   margin-top: 2rem;
   padding: 1rem;
   background-color: #f8f9fa;
@@ -208,6 +209,16 @@ table tr:hover {
   border-bottom: 1px solid #eee;
 }
 
+/* Links */
+a {
+  color: #2980b9;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
 /* Footer */
 footer {
   background-color: #2c3e50;
@@ -235,5 +246,14 @@ footer {
 @media (max-width: 480px) {
   .stats {
     grid-template-columns: 1fr;
+  }
+  
+  table {
+    font-size: 0.8rem;
+  }
+  
+  table th,
+  table td {
+    padding: 0.5rem;
   }
 }

@@ -96,6 +96,9 @@ function showSection(sectionId) {
     case "room-status":
       loadRoomsForStatus();
       break;
+    case "tenant-management":
+      loadTenants();
+      break;
     case "pricing":
       loadRoomsForPricing();
       break;
@@ -191,7 +194,9 @@ function loadRooms() {
             <td>${formatCurrency(getBasePrice(room))} VND</td>
             <td>${getStateName(room.currentState)}</td>
             <td>${
-              room.currentTenant ? room.currentTenant.name : "Không có"
+              room.currentTenant
+                ? `<a href="#" onclick="showTenantDetails('${room.currentTenant.id}')">${room.currentTenant.name}</a>`
+                : "Không có"
             }</td>
             <td>
                 <button onclick="editRoom('${
@@ -205,6 +210,79 @@ function loadRooms() {
 
     roomsList.appendChild(row);
   });
+}
+
+// Tải danh sách người thuê
+function loadTenants() {
+  const rooms = JSON.parse(localStorage.getItem("rooms")) || [];
+  const tenantsList = document.getElementById("tenants-list");
+
+  tenantsList.innerHTML = "";
+
+  // Lấy tất cả người thuê từ các phòng
+  const tenants = [];
+  rooms.forEach((room) => {
+    if (room.currentTenant) {
+      tenants.push({
+        ...room.currentTenant,
+        roomId: room.roomId,
+        dueDate: room.dueDate,
+      });
+    }
+  });
+
+  if (tenants.length === 0) {
+    tenantsList.innerHTML =
+      '<tr><td colspan="7">Không có người thuê nào</td></tr>';
+    return;
+  }
+
+  tenants.forEach((tenant) => {
+    const row = document.createElement("tr");
+    row.innerHTML = `
+            <td>${tenant.name}</td>
+            <td>${tenant.phone}</td>
+            <td>${tenant.id}</td>
+            <td>${tenant.address}</td>
+            <td><a href="#" onclick="showRoomDetails('${tenant.roomId}')">${
+      tenant.roomId
+    }</a></td>
+            <td>${formatDate(tenant.dueDate)}</td>
+            <td>
+                <button onclick="showTenantDetails('${
+                  tenant.id
+                }')"><i class="fas fa-info-circle"></i></button>
+            </td>
+        `;
+    tenantsList.appendChild(row);
+  });
+}
+
+// Hiển thị chi tiết người thuê
+function showTenantDetails(tenantId) {
+  const rooms = JSON.parse(localStorage.getItem("rooms")) || [];
+  const room = rooms.find(
+    (r) => r.currentTenant && r.currentTenant.id === tenantId
+  );
+
+  if (!room || !room.currentTenant) return;
+
+  // Hiển thị modal hoặc alert với thông tin chi tiết
+  const tenant = room.currentTenant;
+  const tenantDetails = `
+        <h3>Thông tin chi tiết người thuê</h3>
+        <p><strong>Tên:</strong> ${tenant.name}</p>
+        <p><strong>SĐT:</strong> ${tenant.phone}</p>
+        <p><strong>CMND/CCCD:</strong> ${tenant.id}</p>
+        <p><strong>Địa chỉ thường trú:</strong> ${tenant.address}</p>
+        <p><strong>Phòng đang thuê:</strong> ${room.roomId}</p>
+        <p><strong>Ngày đến hạn:</strong> ${formatDate(room.dueDate)}</p>
+        <p><strong>Giá thuê hiện tại:</strong> ${formatCurrency(
+          calculateRent(room)
+        )} VND</p>
+    `;
+
+  alert(tenantDetails); // Có thể thay bằng modal đẹp hơn
 }
 
 // Tải phòng cho quản lý trạng thái
@@ -264,6 +342,8 @@ function showRoomDetails(roomId) {
             <h4>Thông tin người thuê</h4>
             <p><strong>Tên:</strong> ${room.currentTenant.name}</p>
             <p><strong>SĐT:</strong> ${room.currentTenant.phone}</p>
+            <p><strong>CMND/CCCD:</strong> ${room.currentTenant.id}</p>
+            <p><strong>Địa chỉ:</strong> ${room.currentTenant.address}</p>
             <p><strong>Ngày đến hạn:</strong> ${formatDate(room.dueDate)}</p>
         `;
   }
@@ -310,9 +390,18 @@ function confirmRentRoom() {
   const roomId = document.getElementById("room-select").value;
   const tenantName = document.getElementById("tenant-name").value;
   const tenantPhone = document.getElementById("tenant-phone").value;
+  const tenantId = document.getElementById("tenant-id").value;
+  const tenantAddress = document.getElementById("tenant-address").value;
   const dueDate = document.getElementById("due-date").value;
 
-  if (!roomId || !tenantName || !tenantPhone || !dueDate) {
+  if (
+    !roomId ||
+    !tenantName ||
+    !tenantPhone ||
+    !tenantId ||
+    !tenantAddress ||
+    !dueDate
+  ) {
     alert("Vui lòng điền đầy đủ thông tin");
     return;
   }
@@ -325,8 +414,10 @@ function confirmRentRoom() {
   // Cập nhật thông tin phòng
   rooms[roomIndex].currentState = "RENTED";
   rooms[roomIndex].currentTenant = {
+    id: tenantId,
     name: tenantName,
     phone: tenantPhone,
+    address: tenantAddress,
   };
   rooms[roomIndex].dueDate = dueDate;
 
@@ -341,6 +432,9 @@ function confirmRentRoom() {
   loadRoomsForStatus();
   showRoomDetails(roomId);
   updateDashboardStats();
+  if (document.getElementById("tenant-management").style.display === "block") {
+    loadTenants();
+  }
 
   alert(`Đã cho thuê phòng ${roomId} thành công!`);
 }
@@ -380,6 +474,9 @@ function vacateRoom() {
   loadRoomsForStatus();
   showRoomDetails(roomId);
   updateDashboardStats();
+  if (document.getElementById("tenant-management").style.display === "block") {
+    loadTenants();
+  }
 
   alert(`Đã nhận trả phòng ${roomId} thành công!`);
 }
@@ -587,6 +684,7 @@ function showPaymentDetails(roomId) {
         <h4>Thông tin thanh toán phòng ${room.roomId}</h4>
         <p><strong>Người thuê:</strong> ${room.currentTenant.name}</p>
         <p><strong>SĐT:</strong> ${room.currentTenant.phone}</p>
+        <p><strong>CMND/CCCD:</strong> ${room.currentTenant.id}</p>
         <p><strong>Ngày đến hạn:</strong> ${formatDate(room.dueDate)}</p>
         <p><strong>Số ngày còn lại:</strong> ${daysRemaining} ngày</p>
         <p><strong>Giá thuê hiện tại:</strong> ${formatCurrency(
@@ -632,6 +730,9 @@ function simulatePayment() {
   // Cập nhật UI
   loadRentedRoomsForPayment();
   showPaymentDetails(roomId);
+  if (document.getElementById("tenant-management").style.display === "block") {
+    loadTenants();
+  }
 
   alert(
     `Đã ghi nhận thanh toán cho phòng ${roomId} thành công! Ngày đến hạn mới: ${formatDate(
@@ -772,6 +873,9 @@ function deleteRoom(roomId) {
   // Cập nhật UI
   loadRooms();
   updateDashboardStats();
+  if (document.getElementById("tenant-management").style.display === "block") {
+    loadTenants();
+  }
 
   alert(`Đã xóa phòng ${roomId} thành công!`);
 }

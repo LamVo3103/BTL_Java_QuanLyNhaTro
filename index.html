@@ -36,6 +36,11 @@
                 >
               </li>
               <li>
+                <a href="#" onclick="showSection('tenant-management')"
+                  ><i class="fas fa-users"></i> Quản lý người thuê</a
+                >
+              </li>
+              <li>
                 <a href="#" onclick="showSection('pricing')"
                   ><i class="fas fa-tags"></i> Chiến lược giá</a
                 >
@@ -177,6 +182,14 @@
                   <input type="text" id="tenant-phone" required />
                 </div>
                 <div class="form-group">
+                  <label for="tenant-id">CMND/CCCD:</label>
+                  <input type="text" id="tenant-id" required />
+                </div>
+                <div class="form-group">
+                  <label for="tenant-address">Địa chỉ thường trú:</label>
+                  <input type="text" id="tenant-address" required />
+                </div>
+                <div class="form-group">
                   <label for="due-date">Ngày đến hạn thanh toán:</label>
                   <input type="date" id="due-date" required />
                 </div>
@@ -190,6 +203,36 @@
               <div id="room-details-content">
                 <p>Vui lòng chọn một phòng để xem chi tiết</p>
               </div>
+            </div>
+          </section>
+
+          <!-- Tenant Management Section -->
+          <section id="tenant-management" class="section" style="display: none">
+            <h2><i class="fas fa-users"></i> Quản lý người thuê</h2>
+            <div class="tenant-actions">
+              <button onclick="loadTenants()">
+                <i class="fas fa-sync-alt"></i> Làm mới danh sách
+              </button>
+            </div>
+
+            <div class="tenant-list">
+              <h3>Danh sách người thuê</h3>
+              <table id="tenants-table">
+                <thead>
+                  <tr>
+                    <th>Tên</th>
+                    <th>SĐT</th>
+                    <th>CMND/CCCD</th>
+                    <th>Địa chỉ</th>
+                    <th>Phòng thuê</th>
+                    <th>Ngày đến hạn</th>
+                    <th>Hành động</th>
+                  </tr>
+                </thead>
+                <tbody id="tenants-list">
+                  <!-- Tenants will be loaded here -->
+                </tbody>
+              </table>
             </div>
           </section>
 
