@@ -257,3 +257,10 @@ footer {
     padding: 0.5rem;
   }
 }
+
+/* Trong phần Tables */
+table th:nth-child(7),
+table td:nth-child(7) {
+  text-align: right;
+  white-space: nowrap;
+}

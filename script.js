@@ -227,13 +227,14 @@ function loadTenants() {
         ...room.currentTenant,
         roomId: room.roomId,
         dueDate: room.dueDate,
+        currentRent: calculateRent(room), // Thêm giá thuê hiện tại
       });
     }
   });
 
   if (tenants.length === 0) {
     tenantsList.innerHTML =
-      '<tr><td colspan="7">Không có người thuê nào</td></tr>';
+      '<tr><td colspan="8">Không có người thuê nào</td></tr>';
     return;
   }
 
@@ -248,6 +249,7 @@ function loadTenants() {
       tenant.roomId
     }</a></td>
             <td>${formatDate(tenant.dueDate)}</td>
+            <td>${formatCurrency(tenant.currentRent)} VND</td>
             <td>
                 <button onclick="showTenantDetails('${
                   tenant.id
@@ -865,6 +867,17 @@ function deleteRoom(roomId) {
   const rooms = JSON.parse(localStorage.getItem("rooms")) || [];
   const updatedRooms = rooms.filter((r) => r.roomId !== roomId);
 
+  // Nếu không còn phòng nào, reset nextRoomId về 1
+  if (updatedRooms.length === 0) {
+    localStorage.setItem("nextRoomId", "1");
+  } else {
+    // Nếu vẫn còn phòng, tìm số lớn nhất và set nextRoomId
+    const maxId = Math.max(
+      ...updatedRooms.map((r) => parseInt(r.roomId.substring(1)))
+    );
+    localStorage.setItem("nextRoomId", (maxId + 1).toString());
+  }
+
   localStorage.setItem("rooms", JSON.stringify(updatedRooms));
 
   // Thêm vào log hoạt động
@@ -879,7 +892,6 @@ function deleteRoom(roomId) {
 
   alert(`Đã xóa phòng ${roomId} thành công!`);
 }
-
 // Các hàm helper
 function getRoomTypeName(roomType) {
   switch (roomType) {
